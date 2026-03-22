@@ -45,13 +45,13 @@ const els = {
 
 async function loadData() {
   const [submissions, repoSignals, transcripts, rubric, summaries, judging, recommendations] = await Promise.all([
-    fetch('data/submissions.json').then(r => r.json()),
-    fetch('data/repo-signals.json').then(r => r.ok ? r.json() : []),
-    fetch('data/video-transcripts.json').then(r => r.ok ? r.json() : []),
-    fetch('data/scoring-rubric.json').then(r => r.ok ? r.json() : { dimensions: [] }),
-    fetch('data/project-summaries.json').then(r => r.ok ? r.json() : []),
-    fetch('data/genlayer-judging-table.json').then(r => r.ok ? r.json() : []),
-    fetch('genlayer-recommendations.json').then(r => r.ok ? r.json() : []),
+    fetch('data/submissions.json?v=20260322c').then(r => r.json()),
+    fetch('data/repo-signals.json?v=20260322c').then(r => r.ok ? r.json() : []),
+    fetch('data/video-transcripts.json?v=20260322c').then(r => r.ok ? r.json() : []),
+    fetch('data/scoring-rubric.json?v=20260322c').then(r => r.ok ? r.json() : { dimensions: [] }),
+    fetch('data/project-summaries.json?v=20260322c').then(r => r.ok ? r.json() : []),
+    fetch('data/genlayer-judging-table.json?v=20260322c').then(r => r.ok ? r.json() : []),
+    fetch('genlayer-recommendations.json?v=20260322c').then(r => r.ok ? r.json() : []),
   ]);
   state.submissions = submissions.map(s => ({ ...s, summary: '', judgeNotes: [] }));
   const summariesMap = new Map(summaries.map(x => [x.id, x]));

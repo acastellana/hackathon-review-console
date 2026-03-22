@@ -219,6 +219,10 @@ function select(id) {
 
 function buildJudgeNotes(item, repo, transcript) {
   const notes = [];
+  if (item.recommendation) {
+    notes.push(`GenLayer recommendation rank: #${item.recommendation.rank} (${item.recommendation.tier}).`);
+    notes.push(`Why it ranks here: ${item.recommendation.rationale}`);
+  }
   if (item.genlayer) {
     notes.push(`GenLayer category: ${item.genlayer.genlayerCategory}.`);
     notes.push(`GenLayer role: ${item.genlayer.role}.`);

@@ -1,41 +1,46 @@
 # GenLayer awards recommendation
 
-## Recommended ranked list
+This ranking is optimized for:
+1. **How well the project uses GenLayer for trustless decision-making**
+2. **How interesting / high-value the use case is**
+3. **Hackathon realism** — reward shipped, credible implementations over over-ambitious concept fog
 
-### 1. TruthMarket
-**Rationale:** Best expression of a GenLayer-native product — AI validator consensus is the core mechanism, not decoration.
+## Ranked list
 
-### 2. Hyphe
-**Rationale:** Very clean fit between GenLayer intelligent contracts and prediction-market resolution.
+### 1. AutoBounty
+**Rationale:** Best trustless-decision use in the field: whether a PR actually satisfies an issue is subjective, valuable, and painful to arbitrate manually. GenLayer is doing real decision work here.
 
-### 3. Rebyt
-**Rationale:** Strong transactional use case where GenLayer validator consensus directly governs payout/release.
+### 2. VeriTask
+**Rationale:** Freelance escrow and work acceptance is exactly the kind of gray-zone decision GenLayer should handle. Clear economic value and strong product fit.
 
-### 4. AutoBounty
-**Rationale:** Excellent use of GenLayer for decentralized AI verification of code-delivery outcomes.
+### 3. Proof of Audit
+**Rationale:** Compliance and audit verification is a genuinely interesting trustless-decision category. It uses GenLayer for contested judgment, not just AI flavor.
 
-### 5. VeriTask
-**Rationale:** High-value escrow/dispute workflow where GenLayer materially improves trust and arbitration.
+### 4. TruthMarket
+**Rationale:** Very clean GenLayer fit: prediction markets need trustworthy resolution. Strong implementation fit, though the category itself is more expected than novel.
 
-### 6. Proven
-**Rationale:** Sharp concept and strong product fit for AI settlement on GenLayer.
+### 5. Rebyt
+**Rationale:** Good application of validator consensus to shipment/payment release where delivery quality and acceptance are hard to encode in standard contracts.
 
-### 7. BuildersClaw
-**Rationale:** On-chain AI judging is a good GenLayer use, though the stack is broader than GenLayer alone.
+### 6. TreasuryPilot
+**Rationale:** DAO treasury policy and constitutional compliance are high-value gray-zone decisions. Strong conceptual fit, though product complexity makes execution harder to assess quickly.
 
-### 8. TrustWork
-**Rationale:** Straightforward and credible intelligent-contract escrow implementation.
+### 7. TrustWork
+**Rationale:** A serious GenLayer category — work submission acceptance and escrow release. Slightly less differentiated than VeriTask but still strong.
 
-### 9. TreasuryPilot
-**Rationale:** Governance and treasury policy are strong GenLayer territory; evidence is solid though product is more complex.
+### 8. PetCare
+**Rationale:** Interesting use of GenLayer for campaign validation where legitimacy is fuzzy and fraud risk matters.
 
-### 10. PetCare
-**Rationale:** AI council validation on GenLayer is a meaningful, understandable application.
+### 9. PayScout
+**Rationale:** Merchant/payment approval with AI validation is directionally strong, even if the product story is somewhat niche.
 
-## Close behind / honorable mentions
+### 10. BuildersClaw
+**Rationale:** AI judging is a plausible GenLayer use, especially for hackathon/build evaluation, but economically less sharp than bounty, escrow, compliance, or treasury decisions.
+
+## Just outside top 10
+- Hyphe
+- Proven
 - DevContractShield
-- PayScout
+- EarnWhile
 - AlephRob
 - PROCUDA
-- Proof of Audit
-- EarnWhile

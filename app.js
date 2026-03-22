@@ -2,11 +2,14 @@ const state = {
   submissions: [],
   repoSignals: new Map(),
   transcripts: new Map(),
+  judging: new Map(),
+  recommendations: new Map(),
   rubric: [],
   selectedId: null,
   activeTracks: new Set(),
   search: '',
-  sort: 'score',
+  sort: 'genlayer',
+  genlayerFilter: 'all',
 };
 
 const els = {
@@ -14,6 +17,7 @@ const els = {
   trackFilters: document.getElementById('trackFilters'),
   search: document.getElementById('search'),
   sort: document.getElementById('sort'),
+  genlayerFilter: document.getElementById('genlayerFilter'),
   clearTracks: document.getElementById('clearTracks'),
   statProjects: document.getElementById('statProjects'),
   statTranscripts: document.getElementById('statTranscripts'),
@@ -40,21 +44,27 @@ const els = {
 };
 
 async function loadData() {
-  const [submissions, repoSignals, transcripts, rubric, summaries] = await Promise.all([
+  const [submissions, repoSignals, transcripts, rubric, summaries, judging, recommendations] = await Promise.all([
     fetch('data/submissions.json').then(r => r.json()),
     fetch('data/repo-signals.json').then(r => r.ok ? r.json() : []),
     fetch('data/video-transcripts.json').then(r => r.ok ? r.json() : []),
     fetch('data/scoring-rubric.json').then(r => r.ok ? r.json() : { dimensions: [] }),
     fetch('data/project-summaries.json').then(r => r.ok ? r.json() : []),
+    fetch('data/genlayer-judging-table.json').then(r => r.ok ? r.json() : []),
+    fetch('genlayer-recommendations.json').then(r => r.ok ? r.json() : []),
   ]);
   state.submissions = submissions.map(s => ({ ...s, summary: '', judgeNotes: [] }));
   const summariesMap = new Map(summaries.map(x => [x.id, x]));
+  state.judging = new Map(judging.map(x => [x.id, x]));
+  state.recommendations = new Map(recommendations.map(x => [x.id, x]));
   state.submissions = state.submissions.map(s => ({
     ...s,
     summary: summariesMap.get(s.id)?.summary || 'Summary pending / generated from available repo and transcript signals.',
     judgeNotes: summariesMap.get(s.id)?.judgeNotes || [],
     scorecard: summariesMap.get(s.id)?.scorecard || {},
     totalScore: summariesMap.get(s.id)?.totalScore ?? computeFallbackScore(s.id),
+    genlayer: state.judging.get(s.id) || null,
+    recommendation: state.recommendations.get(s.id) || null,
   }));
   state.repoSignals = new Map(repoSignals.map(r => [r.id, r]));
   state.transcripts = new Map(transcripts.map(t => [t.id, t]));
@@ -105,10 +115,22 @@ function filtered() {
   if (state.activeTracks.size) {
     items = items.filter(s => (s.tracks || []).some(t => state.activeTracks.has(t)));
   }
+  if (state.genlayerFilter !== 'all') {
+    items = items.filter(s => {
+      const g = s.genlayer || {};
+      return g.genlayerCategory === state.genlayerFilter || g.seriousGenLayerProject === state.genlayerFilter;
+    });
+  }
   items.sort((a, b) => {
     if (state.sort === 'name') return a.projectName.localeCompare(b.projectName);
     if (state.sort === 'updated') return (state.repoSignals.get(b.id)?.lastUpdate || '').localeCompare(state.repoSignals.get(a.id)?.lastUpdate || '');
     if (state.sort === 'demo') return (state.transcripts.get(b.id)?.transcriptStatus === 'ok') - (state.transcripts.get(a.id)?.transcriptStatus === 'ok');
+    if (state.sort === 'genlayer') {
+      const ar = a.recommendation?.rank ?? 999;
+      const br = b.recommendation?.rank ?? 999;
+      if (ar !== br) return ar - br;
+      return (b.totalScore || 0) - (a.totalScore || 0);
+    }
     return (b.totalScore || 0) - (a.totalScore || 0);
   });
   return items;
@@ -136,6 +158,8 @@ function renderList() {
         <div class="project-score">${Math.round(item.totalScore || 0)}</div>
       </div>
       <div class="project-meta">
+        <span>${item.recommendation ? '#' + item.recommendation.rank : '—'}</span>
+        <span>${item.genlayer?.genlayerCategory || 'genlayer ?'}</span>
         <span>${repo?.primaryLanguage || 'lang ?'}</span>
         <span>${repo?.repoExists ? 'repo ✓' : 'repo ?'}</span>
         <span>${tr?.transcriptStatus === 'ok' ? 'transcript ✓' : 'transcript —'}</span>
@@ -158,6 +182,18 @@ function select(id) {
   els.detailTitle.textContent = item.projectName;
   els.detailTotal.textContent = Math.round(item.totalScore || 0);
   els.detailTracks.innerHTML = '';
+  if (item.recommendation) {
+    const tag = document.createElement('span');
+    tag.textContent = `Rank: #${item.recommendation.rank} (${item.recommendation.tier})`;
+    els.detailTracks.appendChild(tag);
+  }
+  if (item.genlayer) {
+    ['GenLayer: ' + item.genlayer.genlayerCategory, 'Role: ' + item.genlayer.role, 'Confidence: ' + item.genlayer.confidence, 'Serious: ' + item.genlayer.seriousGenLayerProject].forEach(text => {
+      const tag = document.createElement('span');
+      tag.textContent = text;
+      els.detailTracks.appendChild(tag);
+    });
+  }
   (item.tracks || []).forEach(track => {
     const tag = document.createElement('span');
     tag.textContent = track;
@@ -183,6 +219,11 @@ function select(id) {
 
 function buildJudgeNotes(item, repo, transcript) {
   const notes = [];
+  if (item.genlayer) {
+    notes.push(`GenLayer category: ${item.genlayer.genlayerCategory}.`);
+    notes.push(`GenLayer role: ${item.genlayer.role}.`);
+    notes.push(`Confidence: ${item.genlayer.confidence}. Serious GenLayer project: ${item.genlayer.seriousGenLayerProject}.`);
+  }
   if (repo.repoExists) notes.push(`Repo detected; primary language: ${repo.primaryLanguage || 'unknown'}.`);
   else notes.push('Repo not confirmed via automation.');
   if (transcript.transcriptStatus === 'ok') notes.push('Transcript available for quick skim.');
@@ -270,6 +311,7 @@ function yesNo(v) {
 
 els.search.addEventListener('input', e => { state.search = e.target.value.trim(); renderList(); });
 els.sort.addEventListener('change', e => { state.sort = e.target.value; renderList(); });
+els.genlayerFilter.addEventListener('change', e => { state.genlayerFilter = e.target.value; renderList(); });
 els.clearTracks.addEventListener('click', () => { state.activeTracks.clear(); renderFilters(); renderList(); });
 els.nextBtn.addEventListener('click', () => stepSelection(1));
 els.prevBtn.addEventListener('click', () => stepSelection(-1));
